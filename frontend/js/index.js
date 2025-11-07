@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const messageEl = document.querySelector('#movie-message');
   const landingHero = document.querySelector('#landing-hero');
   const moviesSection = document.querySelector('#movies-section');
+  const body = document.body;
 
   const showMessage = (text) => {
     messageEl.textContent = text;
@@ -11,11 +12,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const session = await window.CineNoteAuth.getSession();
   if (!session) {
+    body.classList.add('landing-mode');
     landingHero.classList.remove('hidden');
     moviesSection.classList.add('hidden');
     return;
   }
 
+  body.classList.remove('landing-mode');
   landingHero.classList.add('hidden');
   moviesSection.classList.remove('hidden');
 
