@@ -13,11 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     alertEl.classList.add('hidden');
 
     const formData = new FormData(form);
-    const username = formData.get('username');
+    const email = formData.get('email');
     const password = formData.get('password');
 
     try {
-      await window.CineNoteAuth.login({ username, password });
+      await window.CineNoteAuth.login({ email, password });
       showAlert('Login successful. Redirecting...', 'success');
       setTimeout(() => {
         window.location.href = '/index.html';

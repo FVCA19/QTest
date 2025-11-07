@@ -86,27 +86,35 @@
   });
 
   const auth = {
-    registerUser: ({ email, password }) => new Promise((resolve, reject) => {
+    registerUser: ({ username, email, password }) => new Promise((resolve, reject) => {
+      const trimmedUsername = (username || '').trim();
+      if (!trimmedUsername) {
+        return reject(new Error('Username is required'));
+      }
       const attributeList = [
         new AmazonCognitoIdentity.CognitoUserAttribute({
           Name: 'email',
           Value: email
         })
       ];
-      userPool.signUp(email, password, attributeList, null, (err, result) => {
+      attributeList.push(new AmazonCognitoIdentity.CognitoUserAttribute({
+        Name: 'preferred_username',
+        Value: trimmedUsername
+      }));
+      userPool.signUp(trimmedUsername, password, attributeList, null, (err, result) => {
         if (err) return reject(err);
         resolve(result);
       });
     }),
 
-    login: ({ username, password }) => new Promise((resolve, reject) => {
+    login: ({ email, password }) => new Promise((resolve, reject) => {
       const authDetails = new AmazonCognitoIdentity.AuthenticationDetails({
-        Username: username,
+        Username: email,
         Password: password
       });
 
       const cognitoUser = new AmazonCognitoIdentity.CognitoUser({
-        Username: username,
+        Username: email,
         Pool: userPool
       });
 
