@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineNote | Movie Details</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>CineNote</h1>
+      <nav>
+        <a href="/index.html">Movies</a>
+        <a href="/admin.html" data-auth="admin" class="hidden">Admin</a>
+        <a href="/login.html" data-auth="anonymous">Login</a>
+        <a href="/register.html" data-auth="anonymous">Register</a>
+        <a href="#" data-action="logout" data-auth="authenticated" class="hidden">Logout</a>
+      </nav>
+    </header>
+    <main>
+      <section class="grid-two">
+        <div>
+          <img id="movie-poster" class="poster-large" alt="Movie Poster" />
+        </div>
+        <div>
+          <h2 id="movie-title"></h2>
+          <p><strong>Year:</strong> <span id="movie-year"></span></p>
+          <p><strong>Average Rating:</strong> <span id="movie-average"></span></p>
+          <p id="movie-description"></p>
+        </div>
+      </section>
+
+      <section>
+        <h3>Share your review</h3>
+        <p id="review-login-prompt" class="alert secondary hidden">Log in to review this movie.</p>
+        <div id="review-alert" class="alert hidden"></div>
+        <form id="review-form">
+          <label for="review-rating">Rating</label>
+          <select id="review-rating" required>
+            <option value="">Select</option>
+            <option value="1">1 - Awful</option>
+            <option value="2">2 - Meh</option>
+            <option value="3">3 - Fine</option>
+            <option value="4">4 - Great</option>
+            <option value="5">5 - Masterpiece</option>
+          </select>
+          <label for="review-comment">Comment</label>
+          <textarea id="review-comment" placeholder="What did you think?" required></textarea>
+          <button class="button" type="submit">Submit Review</button>
+        </form>
+      </section>
+
+      <section>
+        <h3>Reviews</h3>
+        <div id="review-list" class="reviews"></div>
+      </section>
+    </main>
+
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1481.0.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/amazon-cognito-identity-js/5.2.8/amazon-cognito-identity.min.js" integrity="sha512-YfHyp56bQL14AKGslrYOAZ7K01JHfWHZc5cHOn4m9zPON17QRb/9t7t7CNG1qSwKqpUSf4uYpFcnYUpvCMGo1A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/js/config.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/movie.js"></script>
+  </body>
+</html>
+

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineNote | Discover & Review Films</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>CineNote</h1>
+      <nav>
+        <a href="/index.html">Movies</a>
+        <a href="/admin.html" data-auth="admin" class="hidden">Admin</a>
+        <a href="/login.html" data-auth="anonymous">Login</a>
+        <a href="/register.html" data-auth="anonymous">Register</a>
+        <a href="#" data-action="logout" data-auth="authenticated" class="hidden">Logout</a>
+      </nav>
+    </header>
+    <main>
+      <section>
+        <h2>Latest Movies</h2>
+        <p id="movie-message" class="empty-state hidden"></p>
+        <div id="movie-grid" class="card-grid"></div>
+      </section>
+    </main>
+
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1481.0.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/amazon-cognito-identity-js/5.2.8/amazon-cognito-identity.min.js" integrity="sha512-YfHyp56bQL14AKGslrYOAZ7K01JHfWHZc5cHOn4m9zPON17QRb/9t7t7CNG1qSwKqpUSf4uYpFcnYUpvCMGo1A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/js/config.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/index.js"></script>
+  </body>
+</html>
+

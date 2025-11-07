@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineNote | Admin</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>CineNote Admin</h1>
+      <nav>
+        <a href="/index.html">Movies</a>
+        <a href="/admin.html" data-auth="admin" class="hidden">Admin</a>
+        <a href="/login.html" data-auth="anonymous">Login</a>
+        <a href="/register.html" data-auth="anonymous">Register</a>
+        <a href="#" data-action="logout" data-auth="authenticated" class="hidden">Logout</a>
+      </nav>
+    </header>
+    <main>
+      <section>
+        <h2>Add a new movie</h2>
+        <div id="admin-movie-alert" class="alert hidden"></div>
+        <form id="admin-movie-form">
+          <label for="movie-title-input">Title</label>
+          <input id="movie-title-input" name="title" required />
+          <label for="movie-year-input">Year</label>
+          <input id="movie-year-input" name="year" type="number" min="1888" max="2100" required />
+          <label for="movie-poster-input">Poster URL</label>
+          <input id="movie-poster-input" name="posterUrl" type="url" required />
+          <label for="movie-description-input">Description</label>
+          <textarea id="movie-description-input" name="description" required></textarea>
+          <button class="button" type="submit">Create Movie</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>Movie list</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Year</th>
+              <th>Poster</th>
+              <th>Average</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-movies-body"></tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>User reviews</h2>
+        <div id="admin-review-alert" class="alert hidden"></div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Movie ID</th>
+              <th>User</th>
+              <th>Rating</th>
+              <th>Comment</th>
+              <th>Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-reviews-body"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1481.0.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/amazon-cognito-identity-js/5.2.8/amazon-cognito-identity.min.js" integrity="sha512-YfHyp56bQL14AKGslrYOAZ7K01JHfWHZc5cHOn4m9zPON17QRb/9t7t7CNG1qSwKqpUSf4uYpFcnYUpvCMGo1A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/js/config.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/admin.js"></script>
+  </body>
+</html>
+
