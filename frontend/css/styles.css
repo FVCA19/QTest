@@ -279,6 +279,8 @@ textarea {
   padding: 4.5rem 2.5rem;
   text-align: center;
   isolation: isolate;
+  width: min(1100px, 95%);
+  margin: 2rem auto;
 }
 
 .hero-landing::before {
@@ -286,6 +288,7 @@ textarea {
   position: absolute;
   inset: 0;
   background: url('https://static.vecteezy.com/system/resources/previews/039/374/710/non_2x/cartoon-cinema-auditorium-movie-theater-dark-room-with-red-seats-and-cinema-projector-glowing-scene-background-with-concert-hall-interior-illustration-vector.jpg') center/cover no-repeat;
+  background-size: 135%;
   filter: brightness(0.45);
   z-index: -2;
 }
