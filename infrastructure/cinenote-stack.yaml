@@ -336,6 +336,8 @@ Resources:
       - ApiGatewayMethodRootAny
       - ApiGatewayOptionsMethodProxy
       - ApiGatewayOptionsMethodRoot
+      - ApiGatewayResponse4xx
+      - ApiGatewayResponse5xx
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
       StageName: !Ref EnvironmentName
