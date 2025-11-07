@@ -18,7 +18,32 @@
       </nav>
     </header>
     <main>
-      <section>
+      <section id="landing-hero" class="hero">
+        <div class="hero-copy">
+          <h2>Your personal film diary</h2>
+          <p>Discover new releases, revisit timeless classics, and keep track of every review in one secure place. CineNote blends a clean interface with trustworthy ratings from fellow cinephiles.</p>
+          <div class="hero-cta">
+            <a class="button" href="/login.html">Get Started</a>
+            <span class="empty-state">New here? <a href="/register.html">Create your CineNote account</a>.</span>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span>5★</span>
+            <small>Focused review tools</small>
+          </div>
+          <div class="hero-stat">
+            <span>Zero</span>
+            <small>Movies until you add the first</small>
+          </div>
+          <div class="hero-stat">
+            <span>100%</span>
+            <small>Serverless, secure, and ready for scale</small>
+          </div>
+        </div>
+      </section>
+
+      <section id="movies-section" class="hidden">
         <h2>Latest Movies</h2>
         <p id="movie-message" class="empty-state hidden"></p>
         <div id="movie-grid" class="card-grid"></div>

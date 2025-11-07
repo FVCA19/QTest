@@ -1,11 +1,23 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const listEl = document.querySelector('#movie-grid');
   const messageEl = document.querySelector('#movie-message');
+  const landingHero = document.querySelector('#landing-hero');
+  const moviesSection = document.querySelector('#movies-section');
 
   const showMessage = (text) => {
     messageEl.textContent = text;
     messageEl.classList.remove('hidden');
   };
+
+  const session = await window.CineNoteAuth.getSession();
+  if (!session) {
+    landingHero.classList.remove('hidden');
+    moviesSection.classList.add('hidden');
+    return;
+  }
+
+  landingHero.classList.add('hidden');
+  moviesSection.classList.remove('hidden');
 
   try {
     const movies = await CineNoteApi.listMovies();
