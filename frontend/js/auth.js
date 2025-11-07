@@ -107,6 +107,36 @@
       });
     }),
 
+    confirmRegistration: ({ username, code }) => new Promise((resolve, reject) => {
+      const trimmedUsername = (username || '').trim();
+      if (!trimmedUsername) {
+        return reject(new Error('Username is required'));
+      }
+      const cognitoUser = new AmazonCognitoIdentity.CognitoUser({
+        Username: trimmedUsername,
+        Pool: userPool
+      });
+      cognitoUser.confirmRegistration(code, true, (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    }),
+
+    resendConfirmationCode: ({ username }) => new Promise((resolve, reject) => {
+      const trimmedUsername = (username || '').trim();
+      if (!trimmedUsername) {
+        return reject(new Error('Username is required'));
+      }
+      const cognitoUser = new AmazonCognitoIdentity.CognitoUser({
+        Username: trimmedUsername,
+        Pool: userPool
+      });
+      cognitoUser.resendConfirmationCode((err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    }),
+
     login: ({ email, password }) => new Promise((resolve, reject) => {
       const authDetails = new AmazonCognitoIdentity.AuthenticationDetails({
         Username: email,

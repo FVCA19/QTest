@@ -20,6 +20,7 @@ Browser ── Amplify Hosting ──> API Gateway ──> Lambda ──> Dynamo
 - `frontend/index.html`: List movies with average ratings.
 - `frontend/movie.html`: Movie details, ratings, and user reviews (create/update/delete own review).
 - `frontend/login.html` & `frontend/register.html`: Account access via Cognito.
+- `frontend/verify.html`: Confirmation-code flow for newly registered accounts.
 - `frontend/admin.html`: Admin-only panel for managing movies and deleting reviews.
 
 Global scripts live in `frontend/js/` and share a config stub (`config.js`) that must be updated with live AWS values after provisioning infrastructure.
@@ -68,7 +69,7 @@ Use `infrastructure/cinenote-stack.yaml` to provision the backend. The template 
 
 ### Post-deployment steps
 
-1. In the Cognito console, confirm new users via email. For admin users, add them to the `Admin` group manually.
+1. In the Cognito console, confirm new users via email. Users can also self-confirm from `frontend/verify.html`. For admin users, add them to the `Admin` group manually.
 2. Note stack outputs:
    - `ApiBaseUrl`
    - `UserPoolId`

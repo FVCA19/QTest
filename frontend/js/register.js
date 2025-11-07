@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     alertEl.classList.add('hidden');
 
     const formData = new FormData(form);
-    const username = formData.get('username');
+    const username = formData.get('username').trim();
     const email = formData.get('email');
     const password = formData.get('password');
     const confirm = formData.get('confirm');
@@ -31,8 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       await window.CineNoteAuth.registerUser({ username, email, password });
-      showAlert('Account created. Check your email for confirmation.', 'success');
-      form.reset();
+      showAlert('Account created. Redirecting to verification…', 'success');
+      setTimeout(() => {
+        window.location.href = `/verify.html?username=${encodeURIComponent(username)}`;
+      }, 1500);
     } catch (err) {
       console.error(err);
       showAlert(err.message || 'Registration failed');
