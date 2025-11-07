@@ -47,6 +47,15 @@ nav a:hover {
   color: var(--accent);
 }
 
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
 main {
   flex: 1;
   width: 100%;
@@ -247,6 +256,18 @@ textarea {
   display: none !important;
 }
 
+.muted-link {
+  color: rgba(248, 250, 252, 0.8);
+}
+
+.muted-link a {
+  color: var(--accent);
+}
+
+.muted-link a:hover {
+  text-decoration: underline;
+}
+
 .hero {
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(59, 130, 246, 0.05));
   border: 1px solid rgba(56, 189, 248, 0.2);
@@ -277,6 +298,10 @@ textarea {
 
 .hero-cta .button {
   align-self: flex-start;
+}
+
+.hero-cta .empty-state {
+  color: rgba(248, 250, 252, 0.75);
 }
 
 .hero-stats {
