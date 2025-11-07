@@ -56,10 +56,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
           <p>${review.comment}</p>
           <small>Updated ${new Date(review.updatedAt || review.createdAt).toLocaleString()}</small>
-          ${(canEdit || canDelete) ? `
+          ${canDelete ? `
             <div class="review-actions">
-              ${canEdit ? '<button class="button secondary" data-action="edit">Edit</button>' : ''}
-              ${canDelete ? '<button class="button danger" data-action="delete">Delete</button>' : ''}
+              <button class="button danger" data-action="delete">Delete</button>
             </div>
           ` : ''}
         </div>
@@ -131,15 +130,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const reviewEl = event.target.closest('.review');
     if (!action || !reviewEl) return;
     const reviewId = reviewEl.dataset.reviewId;
-
-    if (action === 'edit') {
-      const rating = reviewEl.querySelector('.review-header span').textContent.replace('⭐', '').trim();
-      const comment = reviewEl.querySelector('p').textContent;
-      ratingInput.value = rating;
-      commentInput.value = comment;
-      reviewForm.scrollIntoView({ behavior: 'smooth' });
-      reviewForm.querySelector('button[type="submit"]').textContent = 'Update Review';
-    }
 
     if (action === 'delete') {
       if (!confirm('Delete this review?')) return;

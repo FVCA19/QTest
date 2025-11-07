@@ -45,6 +45,13 @@ Use `infrastructure/cinenote-stack.yaml` to provision the backend. The template 
 | `ApiLogRetentionDays` | CloudWatch Logs retention for API Gateway. |
 | `CognitoDomainPrefix` | Unique prefix for Cognito Hosted UI (optional for this project but required by template). |
 
+### Provisioning overview
+
+- Package the Lambda handler and place the artifact in S3 so CloudFormation can reference it.
+- Deploy `infrastructure/cinenote-stack.yaml` to create Cognito (user pool, app client, admin group), DynamoDB tables, the Lambda/API Gateway stack, and IAM roles.
+- Record stack outputs (API URL, User Pool info) and assign admins in the Cognito console; update the frontend config with these values.
+- Host the static `frontend/` bundle via AWS Amplify Hosting, pointing it to the deployed API and Cognito resources.
+
 ### Package & deploy Lambda
 
 1. Zip the handler code:

@@ -1,9 +1,23 @@
-const AWS = require('aws-sdk');
 const { randomUUID } = require('crypto');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const {
+  DynamoDBDocumentClient,
+  ScanCommand,
+  GetCommand,
+  PutCommand,
+  DeleteCommand,
+  QueryCommand,
+  BatchWriteCommand,
+  UpdateCommand
+} = require('@aws-sdk/lib-dynamodb');
 
-AWS.config.update({ region: process.env.AWS_REGION || process.env.REGION || 'us-east-1' });
-
-const docClient = new AWS.DynamoDB.DocumentClient();
+const region = process.env.AWS_REGION || process.env.REGION || 'ap-southeast-2';
+const ddbClient = new DynamoDBClient({ region });
+const docClient = DynamoDBDocumentClient.from(ddbClient, {
+  marshallOptions: {
+    removeUndefinedValues: true
+  }
+});
 
 const MOVIE_TABLE = process.env.MOVIE_TABLE;
 const REVIEW_TABLE = process.env.REVIEW_TABLE;
@@ -77,7 +91,7 @@ const withErrorHandling = async (handler, event) => {
 };
 
 const listMovies = async () => {
-  const { Items = [] } = await docClient.scan({ TableName: MOVIE_TABLE }).promise();
+  const { Items = [] } = await docClient.send(new ScanCommand({ TableName: MOVIE_TABLE }));
   Items.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
   return response(200, Items.map((item) => ({
     movieId: item.movieId,
@@ -90,10 +104,10 @@ const listMovies = async () => {
 };
 
 const getMovie = async (movieId) => {
-  const { Item } = await docClient.get({
+  const { Item } = await docClient.send(new GetCommand({
     TableName: MOVIE_TABLE,
     Key: { movieId }
-  }).promise();
+  }));
 
   if (!Item) {
     return response(404, { message: 'Movie not found' });
@@ -131,11 +145,11 @@ const createMovie = async (event) => withErrorHandling(async () => {
     updatedAt: now
   };
 
-  await docClient.put({
+  await docClient.send(new PutCommand({
     TableName: MOVIE_TABLE,
     Item: item,
     ConditionExpression: 'attribute_not_exists(movieId)'
-  }).promise();
+  }));
 
   return response(201, item);
 }, event);
@@ -144,40 +158,40 @@ const deleteMovie = async (event, movieId) => withErrorHandling(async () => {
   const claims = ensureAuthenticated(event);
   ensureAdmin(claims);
 
-  const movieRes = await docClient.get({
+  const movieRes = await docClient.send(new GetCommand({
     TableName: MOVIE_TABLE,
     Key: { movieId }
-  }).promise();
+  }));
 
   if (!movieRes.Item) {
     return response(404, { message: 'Movie not found' });
   }
 
   // Delete reviews for this movie (batch)
-  const reviews = await docClient.query({
+  const reviews = await docClient.send(new QueryCommand({
     TableName: REVIEW_TABLE,
     KeyConditionExpression: 'movieId = :movieId',
     ExpressionAttributeValues: { ':movieId': movieId }
-  }).promise();
+  }));
 
   if (reviews.Items && reviews.Items.length > 0) {
     const chunks = [];
     for (let i = 0; i < reviews.Items.length; i += 25) {
       chunks.push(reviews.Items.slice(i, i + 25));
     }
-    await Promise.all(chunks.map((chunk) => docClient.batchWrite({
+    await Promise.all(chunks.map((chunk) => docClient.send(new BatchWriteCommand({
       RequestItems: {
         [REVIEW_TABLE]: chunk.map((item) => ({
           DeleteRequest: { Key: { movieId: item.movieId, reviewId: item.reviewId } }
         }))
       }
-    }).promise()));
+    }))));
   }
 
-  await docClient.delete({
+  await docClient.send(new DeleteCommand({
     TableName: MOVIE_TABLE,
     Key: { movieId }
-  }).promise();
+  }));
 
   return response(200, { message: 'Movie deleted' });
 }, event);
@@ -185,11 +199,11 @@ const deleteMovie = async (event, movieId) => withErrorHandling(async () => {
 const listReviewsForMovie = async (event, movieId) => withErrorHandling(async () => {
   const claims = getClaims(event);
 
-  const { Items = [] } = await docClient.query({
+  const { Items = [] } = await docClient.send(new QueryCommand({
     TableName: REVIEW_TABLE,
     KeyConditionExpression: 'movieId = :movieId',
     ExpressionAttributeValues: { ':movieId': movieId }
-  }).promise();
+  }));
 
   Items.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
 
@@ -218,24 +232,24 @@ const upsertReview = async (event, movieId) => withErrorHandling(async () => {
     return response(400, { message: 'Comment is required' });
   }
 
-  const movieRes = await docClient.get({
+  const movieRes = await docClient.send(new GetCommand({
     TableName: MOVIE_TABLE,
     Key: { movieId }
-  }).promise();
+  }));
 
   if (!movieRes.Item) {
     return response(404, { message: 'Movie not found' });
   }
 
   const reviewKey = { movieId, reviewId: claims.sub };
-  const existingReview = await docClient.get({
+  const existingReview = await docClient.send(new GetCommand({
     TableName: REVIEW_TABLE,
     Key: reviewKey
-  }).promise();
+  }));
 
   const now = new Date().toISOString();
 
-  await docClient.put({
+  await docClient.send(new PutCommand({
     TableName: REVIEW_TABLE,
     Item: {
       movieId,
@@ -247,7 +261,7 @@ const upsertReview = async (event, movieId) => withErrorHandling(async () => {
       createdAt: existingReview.Item?.createdAt || now,
       updatedAt: now
     }
-  }).promise();
+  }));
 
   const previousRating = existingReview.Item ? existingReview.Item.rating : null;
   const ratingSum = movieRes.Item.ratingSum || 0;
@@ -257,7 +271,7 @@ const upsertReview = async (event, movieId) => withErrorHandling(async () => {
   const newCount = previousRating ? ratingCount : ratingCount + 1;
   const newAverage = newCount === 0 ? null : parseFloat((newSum / newCount).toFixed(2));
 
-  await docClient.update({
+  await docClient.send(new UpdateCommand({
     TableName: MOVIE_TABLE,
     Key: { movieId },
     UpdateExpression: 'SET ratingSum = :sum, ratingCount = :count, averageRating = :avg, updatedAt = :updatedAt',
@@ -267,7 +281,7 @@ const upsertReview = async (event, movieId) => withErrorHandling(async () => {
       ':avg': newAverage,
       ':updatedAt': now
     }
-  }).promise();
+  }));
 
   return response(existingReview.Item ? 200 : 201, {
     movieId,
@@ -289,28 +303,28 @@ const deleteReview = async (event, movieId, reviewId) => withErrorHandling(async
   }
 
   const reviewKey = { movieId, reviewId };
-  const reviewRes = await docClient.get({
+  const reviewRes = await docClient.send(new GetCommand({
     TableName: REVIEW_TABLE,
     Key: reviewKey
-  }).promise();
+  }));
 
   if (!reviewRes.Item) {
     return response(404, { message: 'Review not found' });
   }
 
-  const movieRes = await docClient.get({
+  const movieRes = await docClient.send(new GetCommand({
     TableName: MOVIE_TABLE,
     Key: { movieId }
-  }).promise();
+  }));
 
   if (!movieRes.Item) {
     return response(404, { message: 'Movie not found' });
   }
 
-  await docClient.delete({
+  await docClient.send(new DeleteCommand({
     TableName: REVIEW_TABLE,
     Key: reviewKey
-  }).promise();
+  }));
 
   const ratingSum = movieRes.Item.ratingSum || 0;
   const ratingCount = movieRes.Item.ratingCount || 0;
@@ -319,7 +333,7 @@ const deleteReview = async (event, movieId, reviewId) => withErrorHandling(async
   const newAverage = newCount === 0 ? null : parseFloat((newSum / newCount).toFixed(2));
   const now = new Date().toISOString();
 
-  await docClient.update({
+  await docClient.send(new UpdateCommand({
     TableName: MOVIE_TABLE,
     Key: { movieId },
     UpdateExpression: 'SET ratingSum = :sum, ratingCount = :count, averageRating = :avg, updatedAt = :updatedAt',
@@ -329,7 +343,7 @@ const deleteReview = async (event, movieId, reviewId) => withErrorHandling(async
       ':avg': newAverage,
       ':updatedAt': now
     }
-  }).promise();
+  }));
 
   return response(200, { message: 'Review deleted', averageRating: newAverage, ratingCount: newCount });
 }, event);
@@ -338,7 +352,7 @@ const listAllReviews = async (event) => withErrorHandling(async () => {
   const claims = ensureAuthenticated(event);
   ensureAdmin(claims);
 
-  const { Items = [] } = await docClient.scan({ TableName: REVIEW_TABLE }).promise();
+  const { Items = [] } = await docClient.send(new ScanCommand({ TableName: REVIEW_TABLE }));
   Items.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
 
   return response(200, Items);
