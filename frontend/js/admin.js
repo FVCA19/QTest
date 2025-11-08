@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       reviewTableBody.innerHTML = reviews.map((review) => `
         <tr data-movie-id="${review.movieId}" data-review-id="${review.reviewId}">
-          <td>${review.movieId}</td>
+          <td>${review.movieTitle ?? review.movieId}</td>
           <td>${review.displayName}</td>
           <td>${review.rating}</td>
           <td>${review.comment}</td>

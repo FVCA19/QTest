@@ -352,10 +352,38 @@ const listAllReviews = async (event) => withErrorHandling(async () => {
   const claims = ensureAuthenticated(event);
   ensureAdmin(claims);
 
-  const { Items = [] } = await docClient.send(new ScanCommand({ TableName: REVIEW_TABLE }));
-  Items.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  const scanResult = await docClient.send(new ScanCommand({ TableName: REVIEW_TABLE }));
+  const items = scanResult.Items || [];
+  items.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
 
-  return response(200, Items);
+  const movieCache = new Map();
+
+  const getMovieTitle = async (movieId) => {
+    if (!movieId) return null;
+    if (movieCache.has(movieId)) {
+      return movieCache.get(movieId);
+    }
+    try {
+      const { Item } = await docClient.send(new GetCommand({
+        TableName: MOVIE_TABLE,
+        Key: { movieId }
+      }));
+      const title = Item?.title || null;
+      movieCache.set(movieId, title);
+      return title;
+    } catch (err) {
+      console.error('Failed to fetch movie title', movieId, err);
+      movieCache.set(movieId, null);
+      return null;
+    }
+  };
+
+  const reviewsWithTitles = await Promise.all(items.map(async (item) => ({
+    ...item,
+    movieTitle: await getMovieTitle(item.movieId)
+  })));
+
+  return response(200, reviewsWithTitles);
 }, event);
 
 exports.handler = async (event) => {
