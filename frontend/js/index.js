@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <span class="genre-badge">${movie.genre ?? 'Genre TBD'}</span>
           <p>${movie.year}</p>
           <span class="rating-badge">⭐ ${movie.averageRating ?? 'N/A'}</span>
-          <p>${movie.description?.slice(0, 120) ?? ''}${movie.description && movie.description.length > 120 ? '…' : ''}</p>
+          <p class="description">${movie.description ?? ''}</p>
           <a class="button secondary" href="/movie.html?id=${movie.movieId}">View Details</a>
         </div>
       </article>
