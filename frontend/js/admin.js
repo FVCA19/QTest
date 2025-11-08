@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <tr data-movie-id="${movie.movieId}">
           <td>${movie.title}</td>
           <td>${movie.year}</td>
+          <td>${movie.genre ?? '—'}</td>
           <td><img src="${movie.posterUrl}" alt="${movie.title} poster" style="width:60px;height:auto;border-radius:6px;" /></td>
           <td>${movie.averageRating ?? 'N/A'}</td>
           <td><button class="button danger" data-action="delete">Delete</button></td>

@@ -99,7 +99,8 @@ const listMovies = async () => {
     year: item.year,
     posterUrl: item.posterUrl,
     averageRating: item.averageRating ?? null,
-    description: item.description
+    description: item.description,
+    genre: item.genre ?? null
   })));
 };
 
@@ -119,15 +120,20 @@ const getMovie = async (movieId) => {
 const createMovie = async (event) => withErrorHandling(async () => {
   const claims = ensureAuthenticated(event);
   ensureAdmin(claims);
-  const { title, year, posterUrl, description } = parseBody(event);
+  const { title, year, posterUrl, description, genre } = parseBody(event);
 
-  if (!title || !posterUrl || !description || !year) {
+  if (!title || !posterUrl || !description || !year || !genre) {
     return response(400, { message: 'Missing required fields' });
   }
 
   const numericYear = Number.parseInt(year, 10);
   if (Number.isNaN(numericYear) || numericYear < 1888) {
     return response(400, { message: 'Year must be a valid number' });
+  }
+
+  const allowedGenres = new Set(['Drama', 'Comedy', 'Action', 'Adventure', 'Horror', 'Thriller', 'Sci-fi', 'Romance', 'Mystery', 'Superhero', 'Animation', 'Sports']);
+  if (!allowedGenres.has(genre)) {
+    return response(400, { message: 'Genre is invalid' });
   }
 
   const movieId = randomUUID();
@@ -138,6 +144,7 @@ const createMovie = async (event) => withErrorHandling(async () => {
     year: numericYear,
     posterUrl,
     description,
+    genre,
     ratingSum: 0,
     ratingCount: 0,
     averageRating: null,

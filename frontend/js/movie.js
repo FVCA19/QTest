@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const descEl = document.querySelector('#movie-description');
   const posterEl = document.querySelector('#movie-poster');
   const avgRatingEl = document.querySelector('#movie-average');
+  const genreEl = document.querySelector('#movie-genre');
   const reviewListEl = document.querySelector('#review-list');
   const reviewForm = document.querySelector('#review-form');
   const ratingInput = document.querySelector('#review-rating');
@@ -36,6 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     yearEl.textContent = movie.year;
     descEl.textContent = movie.description;
     posterEl.src = movie.posterUrl;
+    genreEl.textContent = movie.genre ?? 'Unknown';
     avgRatingEl.textContent = movie.averageRating ?? 'Unrated';
   };
 

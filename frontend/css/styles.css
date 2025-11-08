@@ -135,6 +135,17 @@ main {
   font-weight: 600;
 }
 
+.genre-badge {
+  display: inline-flex;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(129, 140, 248, 0.18);
+  color: #c4b5fd;
+  font-size: 0.75rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
 .button {
   background: var(--accent);
   border: none;

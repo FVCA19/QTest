@@ -26,6 +26,22 @@
           <input id="movie-title-input" name="title" required />
           <label for="movie-year-input">Year</label>
           <input id="movie-year-input" name="year" type="number" min="1888" max="2100" required />
+          <label for="movie-genre-input">Genre</label>
+          <select id="movie-genre-input" name="genre" required>
+            <option value="">Select</option>
+            <option value="Drama">Drama</option>
+            <option value="Comedy">Comedy</option>
+            <option value="Action">Action</option>
+            <option value="Adventure">Adventure</option>
+            <option value="Horror">Horror</option>
+            <option value="Thriller">Thriller</option>
+            <option value="Sci-fi">Sci-fi</option>
+            <option value="Romance">Romance</option>
+            <option value="Mystery">Mystery</option>
+            <option value="Superhero">Superhero</option>
+            <option value="Animation">Animation</option>
+            <option value="Sports">Sports</option>
+          </select>
           <label for="movie-poster-input">Poster URL</label>
           <input id="movie-poster-input" name="posterUrl" type="url" required />
           <label for="movie-description-input">Description</label>
@@ -41,6 +57,7 @@
             <tr>
               <th>Movie Title</th>
               <th>Year</th>
+              <th>Genre</th>
               <th>Poster</th>
               <th>Average</th>
               <th>Actions</th>

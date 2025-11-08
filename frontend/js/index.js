@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <img src="${movie.posterUrl}" alt="Poster for ${movie.title}" loading="lazy" />
         <div class="card-content">
           <h2>${movie.title}</h2>
+          <span class="genre-badge">${movie.genre ?? 'Genre TBD'}</span>
           <p>${movie.year}</p>
           <span class="rating-badge">⭐ ${movie.averageRating ?? 'N/A'}</span>
           <p>${movie.description?.slice(0, 120) ?? ''}${movie.description && movie.description.length > 120 ? '…' : ''}</p>
