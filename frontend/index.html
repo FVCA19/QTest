@@ -33,6 +33,47 @@
 
       <section id="movies-section" class="hidden">
         <h2>Latest Movies</h2>
+        <div class="filter-panel">
+          <div class="filter-group">
+            <label for="filter-search">Search</label>
+            <input id="filter-search" type="text" placeholder="Search by title" />
+          </div>
+          <div class="filter-group">
+            <label for="filter-genre">Genre</label>
+            <select id="filter-genre">
+              <option value="">All genres</option>
+              <option value="Drama">Drama</option>
+              <option value="Comedy">Comedy</option>
+              <option value="Action">Action</option>
+              <option value="Adventure">Adventure</option>
+              <option value="Horror">Horror</option>
+              <option value="Thriller">Thriller</option>
+              <option value="Sci-fi">Sci-fi</option>
+              <option value="Romance">Romance</option>
+              <option value="Mystery">Mystery</option>
+              <option value="Superhero">Superhero</option>
+              <option value="Animation">Animation</option>
+              <option value="Sports">Sports</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Year</label>
+            <div class="range-fields">
+              <input id="filter-year-min" type="number" placeholder="From" min="1888" max="2100" />
+              <span>–</span>
+              <input id="filter-year-max" type="number" placeholder="To" min="1888" max="2100" />
+            </div>
+          </div>
+          <div class="filter-group">
+            <label>Rating</label>
+            <div class="range-fields">
+              <input id="filter-rating-min" type="number" placeholder="Min" min="1" max="5" />
+              <span>–</span>
+              <input id="filter-rating-max" type="number" placeholder="Max" min="1" max="5" />
+            </div>
+          </div>
+          <button class="button secondary" id="filter-reset" type="button">Reset</button>
+        </div>
         <p id="movie-message" class="empty-state hidden"></p>
         <div id="movie-grid" class="card-grid"></div>
       </section>
