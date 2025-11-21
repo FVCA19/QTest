@@ -55,7 +55,10 @@ const CineNoteApi = (() => {
     deleteMovie: (movieId) => request(`/movies/${movieId}`, {
       method: 'DELETE'
     }),
-    listAllReviews: () => request('/reviews')
+    listAllReviews: () => request('/reviews'),
+    unflagReview: (movieId, reviewId) => request(`/movies/${movieId}/reviews/${reviewId}/unflag`, {
+      method: 'POST'
+    })
   };
 })();
 

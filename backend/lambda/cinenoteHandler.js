@@ -11,6 +11,38 @@ const {
   UpdateCommand
 } = require('@aws-sdk/lib-dynamodb');
 
+// Simple profanity/inappropriate content filter
+const INAPPROPRIATE_WORDS = [
+  // Profanity
+  'damn', 'hell', 'shit', 'fuck', 'bitch', 'ass', 'bastard', 'crap',
+  // Hate speech indicators
+  'hate', 'stupid', 'idiot', 'moron', 'dumb', 'retard', 'loser',
+  // Harassment indicators  
+  'kill', 'die', 'murder', 'suicide', 'violence', 'threat',
+  // Spam indicators
+  'spam', 'scam', 'fake', 'bot', 'advertisement', 'promo',
+  // Add more words as needed
+];
+
+const checkInappropriateContent = (text) => {
+  if (!text || typeof text !== 'string') return { flagged: false, matchedWords: [] };
+  
+  const lowerText = text.toLowerCase();
+  const matchedWords = [];
+  
+  for (const word of INAPPROPRIATE_WORDS) {
+    if (lowerText.includes(word.toLowerCase())) {
+      matchedWords.push(word);
+    }
+  }
+  
+  return {
+    flagged: matchedWords.length > 0,
+    matchedWords,
+    confidence: matchedWords.length > 0 ? Math.min(matchedWords.length * 0.3, 1.0) : 0
+  };
+};
+
 const region = process.env.AWS_REGION || process.env.REGION || 'ap-southeast-2';
 const ddbClient = new DynamoDBClient({ region });
 const docClient = DynamoDBDocumentClient.from(ddbClient, {
@@ -239,6 +271,9 @@ const upsertReview = async (event, movieId) => withErrorHandling(async () => {
     return response(400, { message: 'Comment is required' });
   }
 
+  // Check for inappropriate content
+  const contentCheck = checkInappropriateContent(comment);
+
   const movieRes = await docClient.send(new GetCommand({
     TableName: MOVIE_TABLE,
     Key: { movieId }
@@ -256,18 +291,24 @@ const upsertReview = async (event, movieId) => withErrorHandling(async () => {
 
   const now = new Date().toISOString();
 
+  // Prepare review item with flagging information
+  const reviewItem = {
+    movieId,
+    reviewId: claims.sub,
+    userId: claims.sub,
+    displayName: claims.username || claims.email,
+    rating,
+    comment,
+    createdAt: existingReview.Item?.createdAt || now,
+    updatedAt: now,
+    flagged: contentCheck.flagged,
+    flaggedAt: contentCheck.flagged ? now : (existingReview.Item?.flaggedAt || null),
+    flaggedWords: contentCheck.flagged ? contentCheck.matchedWords : (existingReview.Item?.flaggedWords || [])
+  };
+
   await docClient.send(new PutCommand({
     TableName: REVIEW_TABLE,
-    Item: {
-      movieId,
-      reviewId: claims.sub,
-      userId: claims.sub,
-      displayName: claims.username || claims.email,
-      rating,
-      comment,
-      createdAt: existingReview.Item?.createdAt || now,
-      updatedAt: now
-    }
+    Item: reviewItem
   }));
 
   const previousRating = existingReview.Item ? existingReview.Item.rating : null;
@@ -393,6 +434,33 @@ const listAllReviews = async (event) => withErrorHandling(async () => {
   return response(200, reviewsWithTitles);
 }, event);
 
+const unflagReview = async (event, movieId, reviewId) => withErrorHandling(async () => {
+  const claims = ensureAuthenticated(event);
+  ensureAdmin(claims);
+
+  const reviewKey = { movieId, reviewId };
+  const reviewRes = await docClient.send(new GetCommand({
+    TableName: REVIEW_TABLE,
+    Key: reviewKey
+  }));
+
+  if (!reviewRes.Item) {
+    return response(404, { message: 'Review not found' });
+  }
+
+  // Update review to remove flagged status
+  await docClient.send(new UpdateCommand({
+    TableName: REVIEW_TABLE,
+    Key: reviewKey,
+    UpdateExpression: 'SET flagged = :flagged REMOVE flaggedAt, flaggedWords',
+    ExpressionAttributeValues: {
+      ':flagged': false
+    }
+  }));
+
+  return response(200, { message: 'Review unflagged successfully' });
+}, event);
+
 exports.handler = async (event) => {
   // Preflight support
   if (event.httpMethod === 'OPTIONS') {
@@ -441,6 +509,11 @@ exports.handler = async (event) => {
   // GET /reviews (admin)
   if (method === 'GET' && segments.length === 1 && segments[0] === 'reviews') {
     return listAllReviews(event);
+  }
+
+  // POST /movies/{id}/reviews/{reviewId}/unflag (admin)
+  if (method === 'POST' && segments.length === 5 && segments[0] === 'movies' && segments[2] === 'reviews' && segments[4] === 'unflag') {
+    return unflagReview(event, segments[1], segments[3]);
   }
 
   return response(404, { message: 'Not found' });

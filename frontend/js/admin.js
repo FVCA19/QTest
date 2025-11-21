@@ -46,19 +46,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const reviews = await CineNoteApi.listAllReviews();
       if (!reviews.length) {
-        reviewTableBody.innerHTML = '<tr><td colspan="6" class="empty-state">No reviews yet.</td></tr>';
+        reviewTableBody.innerHTML = '<tr><td colspan="7" class="empty-state">No reviews yet.</td></tr>';
         return;
       }
-      reviewTableBody.innerHTML = reviews.map((review) => `
-        <tr data-movie-id="${review.movieId}" data-review-id="${review.reviewId}">
-          <td>${review.movieTitle ?? review.movieId}</td>
-          <td>${review.displayName}</td>
-          <td>${review.rating}</td>
-          <td>${review.comment}</td>
-          <td>${new Date(review.updatedAt || review.createdAt).toLocaleString()}</td>
-          <td><button class="button danger" data-action="delete-review">Delete</button></td>
-        </tr>
-      `).join('');
+
+      // Sort reviews to show flagged ones first
+      const sortedReviews = reviews.sort((a, b) => {
+        if (a.flagged && !b.flagged) return -1;
+        if (!a.flagged && b.flagged) return 1;
+        return (b.updatedAt || b.createdAt).localeCompare(a.updatedAt || a.createdAt);
+      });
+
+      // Count flagged reviews
+      const flaggedCount = reviews.filter(r => r.flagged).length;
+      
+      // Update flagged count display
+      const flaggedCountEl = document.querySelector('#flagged-count');
+      if (flaggedCountEl) {
+        flaggedCountEl.textContent = flaggedCount;
+        flaggedCountEl.style.display = flaggedCount > 0 ? 'inline' : 'none';
+      }
+
+      reviewTableBody.innerHTML = sortedReviews.map((review) => {
+        const flaggedClass = review.flagged ? ' class="flagged-review"' : '';
+        const flaggedBadge = review.flagged ? '<span class="flag-badge">🚩 FLAGGED</span>' : '';
+        const flaggedWords = review.flagged && review.flaggedWords ? 
+          `<br><small>Matched words: ${review.flaggedWords.join(', ')}</small>` : '';
+        
+        return `
+          <tr data-movie-id="${review.movieId}" data-review-id="${review.reviewId}"${flaggedClass}>
+            <td>${review.movieTitle ?? review.movieId}</td>
+            <td>${review.displayName}</td>
+            <td>${review.rating}</td>
+            <td>${review.comment}${flaggedWords}</td>
+            <td>${new Date(review.updatedAt || review.createdAt).toLocaleString()}</td>
+            <td>${flaggedBadge}</td>
+            <td>
+              <button class="button danger" data-action="delete-review">Delete</button>
+              ${review.flagged ? '<button class="button secondary" data-action="unflag-review">Unflag</button>' : ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
     } catch (err) {
       console.error('Review load error', err);
       showAlert(reviewAlert, err.message || 'Failed to load reviews');
@@ -106,19 +135,34 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   reviewTableBody.addEventListener('click', async (event) => {
     if (!(event.target instanceof HTMLButtonElement)) return;
-    if (event.target.dataset.action !== 'delete-review') return;
+    const action = event.target.dataset.action;
+    if (!action || !['delete-review', 'unflag-review'].includes(action)) return;
+    
     const row = event.target.closest('tr');
     const movieId = row?.dataset.movieId;
     const reviewId = row?.dataset.reviewId;
     if (!movieId || !reviewId) return;
-    if (!confirm('Delete this review?')) return;
-    try {
-      await CineNoteApi.deleteReview(movieId, reviewId);
-      showAlert(reviewAlert, 'Review deleted', 'success');
-      await Promise.all([loadReviews(), loadMovies()]);
-    } catch (err) {
-      console.error(err);
-      showAlert(reviewAlert, err.message || 'Failed to delete review');
+
+    if (action === 'delete-review') {
+      if (!confirm('Delete this review?')) return;
+      try {
+        await CineNoteApi.deleteReview(movieId, reviewId);
+        showAlert(reviewAlert, 'Review deleted', 'success');
+        await Promise.all([loadReviews(), loadMovies()]);
+      } catch (err) {
+        console.error(err);
+        showAlert(reviewAlert, err.message || 'Failed to delete review');
+      }
+    } else if (action === 'unflag-review') {
+      if (!confirm('Remove flag from this review?')) return;
+      try {
+        await CineNoteApi.unflagReview(movieId, reviewId);
+        showAlert(reviewAlert, 'Review unflagged successfully', 'success');
+        await loadReviews();
+      } catch (err) {
+        console.error(err);
+        showAlert(reviewAlert, err.message || 'Failed to unflag review');
+      }
     }
   });
 });

@@ -450,3 +450,28 @@ textarea {
   }
 }
 
+/* Flagged content styles */
+.flagged-review {
+  background-color: rgba(248, 113, 113, 0.1) !important;
+  border-left: 4px solid var(--danger);
+}
+
+.flag-badge {
+  background: var(--danger);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.flagged-review td {
+  border-color: rgba(248, 113, 113, 0.2);
+}
+
+.flagged-review:hover {
+  background-color: rgba(248, 113, 113, 0.15) !important;
+}
+
